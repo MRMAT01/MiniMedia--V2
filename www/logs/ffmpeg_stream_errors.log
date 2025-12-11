@@ -1,0 +1,35 @@
+[vost#0:0/libx264 @ 000002139893ec00] Error submitting a packet to the muxer: Broken pipe
+    Last message repeated 1 times
+[out#0/mp4 @ 0000021398bfe040] Error muxing a packet
+[out#0/mp4 @ 0000021398bfe040] Task finished with error code: -32 (Broken pipe)
+[out#0/mp4 @ 0000021398bfe040] Terminating thread with return code -32 (Broken pipe)
+[out#0/mp4 @ 0000021398bfe040] Error writing trailer: Broken pipe
+[out#0/mp4 @ 0000021398bfe040] Error closing file: Broken pipe
+[vost#0:0/libx264 @ 000002d6a2bbe740] Error submitting a packet to the muxer: Broken pipe
+    Last message repeated 1 times
+[out#0/mp4 @ 000002d6a2afd640] Error muxing a packet
+[out#0/mp4 @ 000002d6a2afd640] Task finished with error code: -32 (Broken pipe)
+[out#0/mp4 @ 000002d6a2afd640] Terminating thread with return code -32 (Broken pipe)
+[out#0/mp4 @ 000002d6a2afd640] Error writing trailer: Broken pipe
+[out#0/mp4 @ 000002d6a2afd640] Error closing file: Broken pipe
+[vost#0:0/libx264 @ 00000179ecb6f400] Error submitting a packet to the muxer: Broken pipe
+    Last message repeated 1 times
+[out#0/mp4 @ 00000179ecbda940] Error muxing a packet
+[out#0/mp4 @ 00000179ecbda940] Task finished with error code: -32 (Broken pipe)
+[out#0/mp4 @ 00000179ecbda940] Terminating thread with return code -32 (Broken pipe)
+[out#0/mp4 @ 00000179ecbda940] Error writing trailer: Broken pipe
+[out#0/mp4 @ 00000179ecbda940] Error closing file: Broken pipe
+[vost#0:0/libx264 @ 0000021235ce0900] Error submitting a packet to the muxer: Broken pipe
+    Last message repeated 1 times
+[out#0/mp4 @ 0000021235c19d80] Error muxing a packet
+[out#0/mp4 @ 0000021235c19d80] Task finished with error code: -32 (Broken pipe)
+[out#0/mp4 @ 0000021235c19d80] Terminating thread with return code -32 (Broken pipe)
+[out#0/mp4 @ 0000021235c19d80] Error writing trailer: Broken pipe
+[out#0/mp4 @ 0000021235c19d80] Error closing file: Broken pipe
+[vost#0:0/libx264 @ 000002deae6800c0] Error submitting a packet to the muxer: Broken pipe
+    Last message repeated 1 times
+[out#0/mp4 @ 000002deae87eec0] Error muxing a packet
+[out#0/mp4 @ 000002deae87eec0] Task finished with error code: -32 (Broken pipe)
+[out#0/mp4 @ 000002deae87eec0] Terminating thread with return code -32 (Broken pipe)
+[out#0/mp4 @ 000002deae87eec0] Error writing trailer: Broken pipe
+[out#0/mp4 @ 000002deae87eec0] Error closing file: Broken pipe

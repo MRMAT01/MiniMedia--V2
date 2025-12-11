@@ -1,0 +1,3 @@
+Download Windows Version https://www.ffmpeg.org/download.html and add to this folder
+ffmpeg.exe
+ffprobe.exe

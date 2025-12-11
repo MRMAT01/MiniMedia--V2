@@ -1,0 +1,7 @@
+[2025-11-27 20:54:46] Deleted file: C:\MiniMediaServer\www\tv\Billy the Kid\Season 3\Billy.The.Kid.S03E02.mkv
+[2025-11-27 20:54:46] Deleted file: C:\MiniMediaServer\www\media_cache\Billy the Kid\cover.jpg
+[2025-11-27 20:54:46] Deleted file: C:\MiniMediaServer\www\media_cache\Billy the Kid\backdrop.jpg
+[2025-11-27 20:54:46] Deleted directory: C:\MiniMediaServer\www\media_cache\Billy the Kid
+[2025-11-27 20:54:46] ✅ Deleted media ID 13 (Billy The Kid)
+[2025-11-27 20:54:51] Deleted file: C:\MiniMediaServer\www\tv\Billy the Kid\Season 3\Billy.The.Kid.S03E01.mkv
+[2025-11-27 20:54:51] ✅ Deleted media ID 11 (Billy The Kid)

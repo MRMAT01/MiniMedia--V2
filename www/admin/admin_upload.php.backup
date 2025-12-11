@@ -1,0 +1,327 @@
+<?php
+ob_start(); // Buffer output to prevent breaking JSON
+error_reporting(E_ALL);
+ini_set('display_errors', 0); // Do not display errors to frontend
+ini_set('log_errors', 1);
+ini_set('error_log', __DIR__.'/../logs/php_error.txt');
+header('Content-Type: application/json');
+
+require '../config.php';
+if (session_status() === PHP_SESSION_NONE) session_start();
+if (!isset($_SESSION['user_id'])) {
+    ob_end_clean();
+    echo json_encode(['success'=>false,'error'=>'Forbidden']);
+    exit;
+}
+
+// Admin check
+$stmt = $pdo->prepare("SELECT role FROM users WHERE id=?");
+$stmt->execute([$_SESSION['user_id']]);
+$role = $stmt->fetch(PDO::FETCH_ASSOC);
+if (!$role || $role['role'] !== 'admin') {
+    ob_end_clean();
+    echo json_encode(['success'=>false,'error'=>'Forbidden']);
+    exit;
+}
+
+// Inputs
+$chunk = $_FILES['chunk'] ?? null;
+$mediaFile = $_FILES['media_file'] ?? null;
+$coverFileUpload = $_FILES['cover'] ?? null;
+$filename = $_POST['filename'] ?? ($mediaFile['name'] ?? '');
+$offset = (int)($_POST['offset'] ?? 0);
+$done = ($_POST['done'] ?? 0) == 1;
+
+if (!$filename) {
+    ob_end_clean();
+    echo json_encode(['success'=>false,'error'=>'No filename']);
+    exit;
+}
+
+// Temp upload dir
+$tmpDir = __DIR__.'/../media_cache';
+@mkdir($tmpDir,0777,true);
+
+// Make safe basic name for temp file
+$filenameSafeTemp = preg_replace('/[^A-Za-z0-9 _-]/','',$filename);
+$dest = $tmpDir.'/'.$filenameSafeTemp.'.part';
+
+// ----- CHUNKED UPLOAD -----
+if($chunk){
+    if(!file_exists($dest) || $offset===0){
+        if (!move_uploaded_file($chunk['tmp_name'],$dest)) {
+            error_log("Failed move_uploaded_file chunk -> $dest");
+            ob_end_clean();
+            echo json_encode(['success'=>false,'error'=>'Failed to save chunk']);
+            exit;
+        }
+    } else {
+        file_put_contents($dest, file_get_contents($chunk['tmp_name']), FILE_APPEND);
+    }
+    ob_end_clean();
+    echo json_encode(['success'=>true]);
+    exit;
+}
+
+// ----- FULL UPLOAD (FIRST STEP) -----
+if($mediaFile && !$done){
+    if (!move_uploaded_file($mediaFile['tmp_name'],$dest)) {
+        error_log("Failed move_uploaded_file media -> $dest");
+        ob_end_clean();
+        echo json_encode(['success'=>false,'error'=>'Failed to save upload']);
+        exit;
+    }
+    ob_end_clean();
+    echo json_encode(['success'=>true]);
+    exit;
+}
+
+// ----- FINALIZE UPLOAD (conversion + metadata) -----
+if ($done){
+    $type = $_POST['type'] ?? 'movie';
+    $tvFolder = trim($_POST['tv_folder'] ?? '');
+    $season = $_POST['season'] ?? null;
+    $episode = $_POST['episode'] ?? null;
+
+    // -------------------------
+    // Normalize & clean title
+    // -------------------------
+    // Strip extension
+    $baseName = preg_replace('/\.(mp4|mkv|avi|mov|flv|wmv|ts)$/i','',$filename);
+    $clean = preg_replace('/(\[.*?\]|\(.*?\)|\b(5|5.1|4k|2160p|1080p|720p|480p|HDR|HDR10|DV|DDP5|WEB-?DL|WEBRip|WEB|BluRay|BRRip|BDRip|DVDRip|HDTV|HDTS|CAM|TS|TC|x264|x265|h264|hevc|10bit|[0-9]{1,4}MB|[0-9]{1,2}GB|NF|AMZN|HULU|MAX|UHD|HDRip|PROPER|REPACK|LIMITED|EXTENDED|UNRATED|YTS|RARBG|EVO|P2P|AAC|AC5|Rapta|BONE|RMTeam|WORKPRINT|COLLECTiVE|sylix|MeGusta|EZTVx|to|FENiX|ETHEL|nhtfs|ELiTE|ATVP|NTb|successfulcrab|CRAV|SNAKE|SYNCOPY|JFF|AFG|FGT|FLEET|Galaxy(RG|TV)?|RIP|Ganool|YIFY|EVO|P2P|U2|NeoNoir|TGx|MX|AM|RARBG|ETRG|Eng|ESub|DD(5|1)?|LAMA)\b)/i','',$baseName);
+    $clean = preg_replace('/[\[\]\(\)\._-]+/',' ',$clean);
+    $clean = trim(preg_replace('/\s+/',' ',$clean));
+
+    if (preg_match('/\b(19|20)\d{2}\b/',$clean,$m)){
+        $year = $m[0];
+        $title = trim(str_replace($year,'',$clean));
+    } else {
+        $year = null;
+        $title = $clean;
+    }
+
+    $cleanFolderName = preg_replace('/[^A-Za-z0-9 _-]/','',$tvFolder ?: $title ?: $baseName);
+    $filenameSafe = preg_replace('/[^A-Za-z0-9 _-]/','',$title ?: $baseName);
+
+    // -------------------------
+    // Prepare directories/files
+    // -------------------------
+    if ($type === 'tv') {
+        // TV: target location and media_cache structure
+        $targetDir = __DIR__.'/../tv/'.preg_replace('/[^A-Za-z0-9 _-]/','',$tvFolder).'/Season '.$season;
+        $mediaCacheFolder = __DIR__.'/../media_cache/'.$cleanFolderName;
+        $seasonFolder = $mediaCacheFolder.'/Season '.$season;
+        @mkdir($mediaCacheFolder,0777,true);
+        @mkdir($seasonFolder,0777,true);
+        @mkdir($targetDir,0777,true);
+
+        $coverFileFs      = $mediaCacheFolder.DIRECTORY_SEPARATOR.'cover.jpg';
+        $backdropFileFs   = $mediaCacheFolder.DIRECTORY_SEPARATOR.'backdrop.jpg';
+        $progressFileFs   = $mediaCacheFolder.DIRECTORY_SEPARATOR.'progress.json';
+        $mainMetadataFs   = $mediaCacheFolder.DIRECTORY_SEPARATOR.$filenameSafe.'.json';
+
+        // episode metadata filename
+        $epNumber = is_numeric($episode) ? str_pad((int)$episode,2,'0',STR_PAD_LEFT) : ($episode ?: '01');
+        $seasonNumber = is_numeric($season) ? str_pad((int)$season,2,'0',STR_PAD_LEFT) : ($season ?: '01');
+        $episodeMetadataFs = $seasonFolder.DIRECTORY_SEPARATOR.'S'.$seasonNumber.'E'.$epNumber.'.json';
+
+    } elseif ($type === 'movie' || $type === 'featured') {
+        // Featured behaves same as movies, stored separately in media_cache/featured
+        $targetDir = __DIR__ . '/../' . ($type === 'featured' ? 'featured' : 'movies');
+        @mkdir($targetDir, 0777, true);
+
+        $mediaCacheFolder = __DIR__ . '/../' . ($type === 'featured' ? 'media_cache/featured/' : 'media_cache/') . $filenameSafe;
+        @mkdir($mediaCacheFolder, 0777, true);
+
+        $coverFileFs    = $mediaCacheFolder . DIRECTORY_SEPARATOR . 'cover.jpg';
+        $backdropFileFs = $mediaCacheFolder . DIRECTORY_SEPARATOR . 'backdrop.jpg';
+        $mainMetadataFs = $mediaCacheFolder . DIRECTORY_SEPARATOR . $filenameSafe . '.json';
+    } else {
+        // music
+        $targetDir = __DIR__.'/../music';
+        @mkdir($targetDir,0777,true);
+        $coverFileFs = $targetDir.DIRECTORY_SEPARATOR.'covers'.DIRECTORY_SEPARATOR.$filenameSafe.'.jpg';
+        $mediaCacheFolder = __DIR__.'/../media_cache/'.$filenameSafe;
+        echo json_encode(['success'=>false,'error'=>'FFmpeg conversion failed. Check if FFmpeg is installed and the file format is supported.']);
+        exit;
+    }
+
+    // Remove any progress.json placed by other logic
+    if (isset($progressFileFs) && file_exists($progressFileFs)) {
+        @unlink($progressFileFs);
+    }
+
+    // -------------------------
+    // Cover / Backdrop handling
+    // -------------------------
+    // If user provided manual cover, move it into main folder (for TV: main media_cache folder)
+    if ($coverFileUpload && !empty($coverFileUpload['tmp_name']) && file_exists($coverFileUpload['tmp_name'])) {
+        // always write to the intended cover path (main folder)
+        if (!move_uploaded_file($coverFileUpload['tmp_name'], $coverFileFs)) {
+            error_log("Failed to move manual cover to $coverFileFs");
+        }
+    }
+
+    // TMDb: only if we need images/metadata and type != music
+    if ($type !== 'music') {
+        // Determine if images/metadata are missing
+        $needCover = !file_exists($coverFileFs) || filesize($coverFileFs) === 0;
+        $needBackdrop = !file_exists($backdropFileFs) || filesize($backdropFileFs) === 0;
+        $needMetadata = !file_exists($mainMetadataFs) || filesize($mainMetadataFs) === 0;
+
+        if ($needCover || $needBackdrop || $needMetadata) {
+            // Use API key from config (expects $tmdb_api in config.php)
+            $tmdb_api_key = $tmdb_api ?? '';
+            if (!$tmdb_api_key) {
+                error_log("TMDb API key not configured in config.php");
+            } else {
+                // For TV, strip SxxExx from the search term so TMDb finds the show
+                $tmdb_search_title = $title;
+                if ($type === 'tv') {
+                    $tmdb_search_title = preg_replace('/S\d{1,2}E\d{1,2}/i','',$tmdb_search_title);
+                    $tmdb_search_title = trim($tmdb_search_title);
+                }
+                $searchUrl = "https://api.themoviedb.org/3/".($type==='tv'?'search/tv':'search/movie')."?api_key=".urlencode($tmdb_api_key)."&query=".urlencode($tmdb_search_title);
+                if ($year && $type==='movie') $searchUrl .= "&year=" . urlencode($year);
+
+                $searchJson = @file_get_contents($searchUrl);
+                if ($searchJson === false) {
+                    error_log("TMDb search request failed: $searchUrl");
+                } else {
+                    $search = @json_decode($searchJson, true);
+                    if (!is_array($search)) {
+                        error_log("TMDb search JSON parse failed for: $searchUrl - response: " . substr($searchJson,0,500));
+                    } elseif (!empty($search['results'][0]['id'])) {
+                        $tmdbId = $search['results'][0]['id'];
+                        $detailEndpoint = $type === 'tv' ? 'tv' : 'movie';
+                        $detailUrl = "https://api.themoviedb.org/3/{$detailEndpoint}/{$tmdbId}?api_key=".urlencode($tmdb_api_key);
+                        $detailJson = @file_get_contents($detailUrl);
+                        if ($detailJson === false) {
+                            error_log("TMDb detail fetch failed: $detailUrl");
+                        } else {
+                            $detail = @json_decode($detailJson, true);
+                            if (!is_array($detail)) {
+                                error_log("TMDb detail JSON parse failed for: $detailUrl - response: " . substr($detailJson,0,500));
+                            } else {
+                                // Write main metadata JSON
+                                if ($needMetadata) {
+                                    if (@file_put_contents($mainMetadataFs, json_encode($detail, JSON_PRETTY_PRINT)) === false) {
+                                        error_log("Failed to write metadata file: $mainMetadataFs");
+                                    }
+                                }
+
+                                // Download poster/backdrop (prefer original size)
+                                if ($needCover && !empty($detail['poster_path'])) {
+                                    $posterUrl = 'https://image.tmdb.org/t/p/w500'.$detail['poster_path'];
+                                    $posterData = @file_get_contents($posterUrl);
+                                    if ($posterData !== false) {
+                                        @file_put_contents($coverFileFs, $posterData);
+                                    } else {
+                                        error_log("Failed to download poster: $posterUrl");
+                                    }
+                                }
+
+                                if ($needBackdrop && !empty($detail['backdrop_path'])) {
+                                    $backdropUrl = 'https://image.tmdb.org/t/p/w1280'.$detail['backdrop_path'];
+                                    $backdropData = @file_get_contents($backdropUrl);
+                                    if ($backdropData !== false) {
+                                        @file_put_contents($backdropFileFs, $backdropData);
+                                    } else {
+                                        error_log("Failed to download backdrop: $backdropUrl");
+                                    }
+                                }
+
+                                // For TV: write episode metadata file for the uploaded episode
+                                if ($type === 'tv') {
+                                    // Prefer fetching specific episode details from TMDb if season+episode were provided
+                                    if (is_numeric($season) && is_numeric($episode)) {
+                                        $epUrl = "https://api.themoviedb.org/3/tv/{$tmdbId}/season/".intval($season)."/episode/".intval($episode)."?api_key=".urlencode($tmdb_api_key);
+                                        $epJson = @file_get_contents($epUrl);
+                                        $epData = @json_decode($epJson, true);
+                                        if (is_array($epData) && !empty($epData)) {
+                                            @file_put_contents($episodeMetadataFs, json_encode($epData, JSON_PRETTY_PRINT));
+                                        } else {
+                                            // fallback: use last_episode_to_air if present
+                                            if (!empty($detail['last_episode_to_air'])) {
+                                                @file_put_contents($episodeMetadataFs, json_encode($detail['last_episode_to_air'], JSON_PRETTY_PRINT));
+                                            }
+                                        }
+                                    } else {
+                                        // no season/episode provided: store last_episode_to_air if available
+                                        if (!empty($detail['last_episode_to_air'])) {
+                                            @file_put_contents($episodeMetadataFs, json_encode($detail['last_episode_to_air'], JSON_PRETTY_PRINT));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        error_log("TMDb no results for: {$tmdb_search_title}");
+                    }
+                }
+            }
+        }
+    }
+
+    // If we still don't have cover/backdrop, copy fallback if present
+    $fallbackCover = __DIR__.'/../media_cache/noimage.png';
+    $fallbackBackdrop = __DIR__.'/../media_cache/no_backdrop.png';
+    if (!file_exists($coverFileFs) || filesize($coverFileFs) === 0) {
+        if (file_exists($fallbackCover)) @copy($fallbackCover, $coverFileFs);
+    }
+    if (!file_exists($backdropFileFs) || filesize($backdropFileFs) === 0) {
+        if (file_exists($fallbackBackdrop)) @copy($fallbackBackdrop, $backdropFileFs);
+    }
+
+    // -------------------------
+    // Insert into DB: use relative web paths (forward slashes)
+    // -------------------------
+    $short_url = substr(md5(time().rand()),0,8);
+    $dbPath = ($type==='tv'
+        ? 'tv/'.preg_replace('/[^A-Za-z0-9 _-]/','',$tvFolder).'/Season '.$season.'/'.$finalFileName
+        : ($type==='movie' ? 'movies/'.$finalFileName
+        : ($type==='featured' ? 'featured/'.$finalFileName : 'music/'.$finalFileName))
+    );
+
+    // Normalize DB cover/backdrop paths to forward slashes and relative path
+    $coverRel = null;
+    $backdropRel = null;
+
+    if (isset($coverFileFs) && file_exists($coverFileFs)) {
+        // convert filesystem path to web relative path under project root
+        $coverRel = str_replace('\\','/', ltrim(str_replace(dirname(__DIR__), '', $coverFileFs), '/\\'));
+    }
+    if (isset($backdropFileFs) && file_exists($backdropFileFs)) {
+        $backdropRel = str_replace('\\','/', ltrim(str_replace(dirname(__DIR__), '', $backdropFileFs), '/\\'));
+    }
+
+    // if null, set sensible defaults
+    if (!$coverRel) $coverRel = 'media_cache/noimage.png';
+    if (!$backdropRel) $backdropRel = 'media_cache/no_backdrop.png';
+
+    $stmt = $pdo->prepare("INSERT INTO media (title,type,path,cover,short_url,season,episode,created_at,backdrop) VALUES (?,?,?,?,?,?,?,?,?)");
+    $stmt->execute([
+        $title,
+        $type,
+        $dbPath,
+        $coverRel,
+        $short_url,
+        $season ?? null,
+        $episode ?? null,
+        date('Y-m-d H:i:s'),
+        $backdropRel
+    ]);
+
+    // Cleanup temp
+    @unlink($dest);
+    @unlink($logFile);
+
+    ob_end_clean();
+    echo json_encode(['success'=>true,'message'=>'Upload complete']);
+    exit;
+}
+
+// Default response
+ob_end_clean();
+echo json_encode(['success'=>false,'error'=>'No action performed']);
+exit;

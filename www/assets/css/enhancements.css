@@ -1,0 +1,338 @@
+/* Enhanced Media Cards & Visual Improvements */
+@import url('rating.css');
+
+
+/* Media Card Enhancements */
+.media-card {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+
+.media-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    z-index: 10;
+}
+
+/* Media Card Overlay */
+.media-card-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.7), transparent);
+    padding: 15px;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+}
+
+.media-card:hover .media-card-overlay {
+    transform: translateY(0);
+}
+
+/* Genre Badges */
+.genre-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 8px;
+}
+
+.genre-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(5px);
+    font-size: 0.7rem;
+    color: #fff;
+    font-weight: 500;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* NEW Badge */
+.badge-new {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: linear-gradient(135deg, #ff4444, #ff6666);
+    color: white;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(255, 68, 68, 0.4);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+/* Search Results Styling */
+.search-results-container {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #1a1a1a;
+    border-radius: 8px;
+    margin-top: 5px;
+    max-height: 400px;
+    overflow-y: auto;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: none;
+}
+
+.search-result-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-bottom: 1px solid #333;
+    transition: background 0.2s;
+    text-decoration: none;
+    color: #fff;
+}
+
+.search-result-item:hover {
+    background: #2a2a2a;
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+
+.search-result-item img {
+    width: 50px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.search-result-info {
+    flex: 1;
+}
+
+.search-result-info strong {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 0.95rem;
+}
+
+.search-result-info small {
+    color: #999;
+    font-size: 0.8rem;
+}
+
+.search-result-icon {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.search-result-item.no-results,
+.search-result-item.error {
+    justify-content: center;
+    color: #999;
+    cursor: default;
+}
+
+.search-result-item.error {
+    color: #ff6666;
+}
+
+/* Global Search Bar */
+.global-search-bar {
+    position: relative;
+    max-width: 600px;
+    margin: 0 auto 30px;
+}
+
+.global-search-bar input {
+    width: 100%;
+    padding: 12px 45px 12px 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 25px;
+    color: #fff;
+    font-size: 0.95rem;
+    transition: all 0.3s;
+}
+
+.global-search-bar input:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+}
+
+.global-search-bar input::placeholder {
+    color: #999;
+}
+
+.global-search-bar input:-webkit-autofill,
+.global-search-bar input:-webkit-autofill:hover,
+.global-search-bar input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #fff !important;
+    -webkit-box-shadow: 0 0 0px 1000px rgba(255, 255, 255, 0.1) inset !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+.search-icon {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+    pointer-events: none;
+}
+
+/* Rating Stars */
+.rating-stars {
+    display: inline-flex;
+    gap: 3px;
+    font-size: 1rem;
+}
+
+.rating-stars .star {
+    color: #666;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.rating-stars .star.filled {
+    color: #ffd700;
+}
+
+.rating-stars .star:hover,
+.rating-stars .star:hover~.star {
+    color: #ffd700;
+}
+
+/* Watchlist Button */
+.watchlist-btn {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(40, 30, 0, 1.9);
+    border: none;
+    color: white;
+    width: 65px;
+    height: 30px;
+    border-radius: 20%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    z-index: 10;
+    backdrop-filter: blur(5px);
+}
+
+.watchlist-btn:hover {
+    background: rgba(0, 0, 0, 0.9);
+    transform: scale(1.1);
+}
+
+.watchlist-btn.in-watchlist {
+    background: rgba(255, 68, 68, 0.8);
+}
+
+.watchlist-btn i {
+    font-size: 1rem;
+}
+
+/* Continue Watching Progress */
+.progress-indicator {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.progress-indicator-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4CAF50, #8BC34A);
+    transition: width 0.3s;
+}
+
+/* Mobile Responsive Improvements */
+@media (max-width: 768px) {
+    .media-card {
+        width: 100%;
+        max-width: 300px;
+        margin: 0 auto;
+    }
+
+    .media-card:hover {
+        transform: translateY(-4px);
+    }
+
+    .global-search-bar {
+        margin: 0 10px 20px;
+    }
+
+    .search-results-container {
+        max-height: 300px;
+    }
+}
+
+/* Sidebar Improvements */
+@media (max-width: 992px) {
+    #sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s;
+    }
+
+    #sidebar.active {
+        transform: translateX(0);
+    }
+
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 99;
+    }
+
+    .sidebar-overlay.active {
+        display: block;
+    }
+}
+
+/* Smooth scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1a1a1a;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #444;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #666;
+}

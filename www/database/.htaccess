@@ -1,0 +1,16 @@
+# Disable directory listing
+Options -Indexes
+
+# If someone tries to open the folder directly
+RewriteEngine On
+
+# Allow access to actual files, but block folder index access
+# If the request maps to a directory (and not a real file), redirect to 404 page
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteCond %{REQUEST_URI} !/404\.php$
+RewriteRule ^.*$ /404.php [L,R=302]
+
+# Block access to index files inside these folders
+<FilesMatch "^(index\.php|index\.html|index\.htm)$">
+    Deny from all
+</FilesMatch>

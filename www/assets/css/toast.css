@@ -1,0 +1,131 @@
+/* Toast Notification System */
+
+.toast-container-custom {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    pointer-events: none;
+}
+
+.toast-custom {
+    min-width: 320px;
+    max-width: 450px;
+    padding: 16px 20px;
+    border-radius: 10px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    color: white;
+    pointer-events: all;
+    backdrop-filter: blur(10px);
+}
+
+.toast-custom.success {
+    background: linear-gradient(135deg, #4CAF50, #66BB6A);
+}
+
+.toast-custom.error {
+    background: linear-gradient(135deg, #f44336, #e57373);
+}
+
+.toast-custom.warning {
+    background: linear-gradient(135deg, #FF9800, #FFB74D);
+}
+
+.toast-custom.info {
+    background: linear-gradient(135deg, #2196F3, #64B5F6);
+}
+
+.toast-icon {
+    font-size: 1.6rem;
+    flex-shrink: 0;
+    width: 30px;
+    text-align: center;
+}
+
+.toast-message {
+    flex: 1;
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+.toast-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.4rem;
+    cursor: pointer;
+    opacity: 0.7;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.toast-close:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(450px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    to {
+        transform: translateX(450px);
+        opacity: 0;
+    }
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .toast-container-custom {
+        left: 10px;
+        right: 10px;
+        top: 10px;
+    }
+
+    .toast-custom {
+        min-width: unset;
+        width: 100%;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateY(-100px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideOut {
+        to {
+            transform: translateY(-100px);
+            opacity: 0;
+        }
+    }
+}

@@ -1,0 +1,38 @@
+/* Rating Stars */
+.rating-stars {
+    display: inline-block;
+    font-size: 1.5rem;
+    color: #ccc;
+    cursor: pointer;
+}
+
+.rating-stars .star {
+    transition: color 0.2s;
+}
+
+.rating-stars .star.filled {
+    color: #f39c12;
+    /* Gold color */
+}
+
+.rating-stars .star:hover {
+    color: #f1c40f;
+    /* Lighter gold on hover */
+}
+
+.rating-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.avg-rating {
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: #f39c12;
+}
+
+.rating-count {
+    font-size: 0.9rem;
+    color: #aaa;
+}
