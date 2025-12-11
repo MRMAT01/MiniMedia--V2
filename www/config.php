@@ -77,9 +77,9 @@ function isGetID3Available() {
 }
 
 // TMDb API (v3 key)
-$tmdb_api = '329f15b1739db617dec4f486b4df88d9'; // Add your TMDb API key here
+$tmdb_api = 'Your API here'; // Add your TMDb API key here
 // TMDb Read Access Token (v4)
-$tmdb_token = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIzMjlmMTViMTczOWRiNjE3ZGVjNGY0ODZiNGRmODhkOSIsIm5iZiI6MTc1NjE2Njc1Ny42ODUsInN1YiI6IjY4YWNmYTY1YzQ0NTg3NGU2Nzc4MjQ3MCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.lQDqbqthgp5SZrBifP5t2IA_kv29M5XF5HdIHptI7KE';
+$tmdb_token = 'Your token here';
 
 // Logo configuration
 define('LOGO_FILENAME', 'logo.png');
