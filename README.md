@@ -1,4 +1,4 @@
-<h3># 🎬 MiniMedia V2</h3>h3>
+<h3># 🎬 MiniMedia V2</h3>
 
 <p>**MiniMedia V2** — Next step toward a standalone desktop media server app.</p>
 <p>Currently V1 is built with **PHP**, **MySQL**, **JavaScript**, **CSS**, **JSON**, **FFmpeg**, and **getID3**.</p>  
