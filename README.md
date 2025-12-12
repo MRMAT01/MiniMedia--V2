@@ -7,7 +7,7 @@
 <p>If I’ve missed anything — it’s been a massive build already!</p>
 <p>Things May change And there maybe errors i will get them when i can.</p>
 <p>Admin Login: admin/admin Email admin@admin.com</p>
-<p>Test User: test/test Email test@test.com</p>
+<p>Test User: Email test@test.com Pass: test </p>
 <p>There is a database editor but has some bugs http://localhost/minidbadmin</p>
 ---
 
