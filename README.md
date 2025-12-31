@@ -1,11 +1,14 @@
-# 🎬 MiniMedia V2
+<h3># 🎬 MiniMedia V2</h3>
 
-**MiniMedia V2** — Next step toward a standalone desktop media server app.  
-Currently built with **PHP**, **MySQL**, **JavaScript**, **CSS**, **JSON**, **FFmpeg**, and **getID3**.  
-The standalone version transitions to **PHP + SQLite** for full portability.  
+<p>**MiniMedia V2** — Next step toward a standalone desktop media server app.</p>
+<p>Currently V1 is built with **PHP**, **MySQL**, **JavaScript**, **CSS**, **JSON**, **FFmpeg**, and **getID3**.</p>  
+<p>The standalone version transitions to **PHP + SQLite** with **JavaScript**, **CSS**, **JSON**, **FFmpeg**, and **getID3** for full portability.</p>  
 
-If I’ve missed anything — it’s been a massive build already!
-
+<p>If I’ve missed anything — it’s been a massive build already!</p>
+<p>Things May change And there maybe errors i will get them when i can.</p>
+<p>Admin Login: admin/admin Email admin@admin.com</p>
+<p>Test User: Email test@test.com Pass: test </p>
+<p>There is a database editor but has some bugs http://localhost/minidbadmin</p>
 ---
 
 ## 🚀 Features
