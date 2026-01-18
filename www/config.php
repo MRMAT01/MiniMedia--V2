@@ -76,10 +76,14 @@ function isGetID3Available() {
     return GETID3_PATH !== null;
 }
 
+
+// ///////////////// Add your TMDb API key below Get a free api key https://tmdb.org/https://tmdb.org/
 // TMDb API (v3 key)
 $tmdb_api = 'Your API here'; // Add your TMDb API key here
 // TMDb Read Access Token (v4)
 $tmdb_token = 'Your token here';
+// /////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 // Logo configuration
 define('LOGO_FILENAME', 'logo.png');
